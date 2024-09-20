@@ -1,38 +1,78 @@
-.App {
-  text-align: center;
+.card {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.card:hover {
+  transform: scale(1.05);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.card img {
+  border-bottom: 1px solid #ddd;
 }
 
-.App-header {
-  background-color: #282c34;
+.container {
+  margin-top: 20px;
+}
+
+.pagination button {
+  cursor: pointer;
+}
+
+.list-group-item {
+  font-size: 18px;
+}
+
+.meal img {
+  border-radius: 8px;
+}
+.card {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  border-bottom: 1px solid #ddd;
+}
+
+.container {
+  margin-top: 20px;
+}
+
+.pagination button {
+  cursor: pointer;
+}
+
+.list-group-item {
+  font-size: 18px;
+}
+
+.meal img {
+  border-radius: 8px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  background-color: #FECDA6;
+}
+
+footer {
+  background-color: #343a40;
   color: white;
+  text-align: center;
+  padding: 10px 0 ;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.container {
+  margin-top: 20px;
 }
