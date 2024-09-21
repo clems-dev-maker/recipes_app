@@ -112,7 +112,7 @@ function Home() {
       </div>
 
       {/* Pagination */}
-      <div className="d-flex justify-content-center">
+      <div className="d-flex justify-content-center" style={{marginBottom: "15px"}}>
         {Array.from({ length: Math.ceil((meals ? meals.length : 0) / mealsPerPage) }, (_, i) => (
           <button key={i + 1} className="btn btn-outline-primary mx-1" onClick={() => paginate(i + 1)}>
             {i + 1}
