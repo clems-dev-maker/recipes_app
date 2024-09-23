@@ -57,7 +57,7 @@ function Home() {
 
   return (
     <div className="container">
-      <h1 className="text-center my-4">Application de Recettes</h1>
+      <h1 className="text-center my-4" style={{color: "#2C7865"}}>Application de Recettes</h1>
 
       {/* Barre de recherche */}
       <div className="input-group mb-4">
@@ -67,12 +67,14 @@ function Home() {
           placeholder="Rechercher une recette..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          style={{color: "#2C7865"}}
         />
       </div>
 
       {/* Filtres par catégorie */}
       <div className="mb-4">
-        <select
+        <select 
+          style={{color: "#2C7865"}}
           className="form-select"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
@@ -93,7 +95,7 @@ function Home() {
             <div className="card h-100">
               <img src={meal.strMealThumb} className="card-img-top" alt={meal.strMeal} />
               <div className="card-body">
-                <h5 className="card-title">{meal.strMeal}</h5>
+                <h5 className="card-title" style={{color: "#2C7865"}}>{meal.strMeal}</h5>
                 <div className="d-flex justify-content-between">
                   <Link to={`/recipe/${meal.idMeal}`} className="btn btn-primary">
                     Voir les détails
