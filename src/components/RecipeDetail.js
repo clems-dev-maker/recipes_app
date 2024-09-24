@@ -17,6 +17,9 @@ import {
 function RecipeDetail() {
   const { id } = useParams();
   const [meal, setMeal] = useState(null);
+  const [missingIngredients, setMissingIngredients] = useState([]);
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [showShoppingList, setShowShoppingList] = useState(false);  // Pour afficher la liste de courses
   const [comment, setComment] = useState()
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0); // Pour le survol des étoiles
@@ -74,6 +77,11 @@ function RecipeDetail() {
       try {
         const response = await axios.get(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
         setMeal(response.data.meals[0]);
+
+        // Initialiser les ingrédients sélectionnés depuis le localStorage
+        const storedIngredients = JSON.parse(localStorage.getItem(`ingredients-${id}`)) || [];
+        setSelectedIngredients(storedIngredients);
+
       } catch (error) {
         console.error("Erreur lors de la récupération des détails de la recette :", error);
       }
@@ -81,6 +89,57 @@ function RecipeDetail() {
 
     fetchMealDetails();
   }, [id]);
+
+  // Fonction pour gérer la sélection/déselection d'un ingrédient
+  const toggleIngredient = (ingredient) => {
+    let updatedSelectedIngredients;
+
+    if (selectedIngredients.includes(ingredient)) {
+      updatedSelectedIngredients = selectedIngredients.filter((i) => i !== ingredient);
+    } else {
+      updatedSelectedIngredients = [...selectedIngredients, ingredient];
+    }
+
+    setSelectedIngredients(updatedSelectedIngredients);
+
+    // Sauvegarder dans le localStorage
+    localStorage.setItem(`ingredients-${id}`, JSON.stringify(updatedSelectedIngredients));
+  };
+
+   // Calculer les ingrédients manquants
+   useEffect(() => {
+    if (meal) {
+      const allIngredients = [];
+
+      for (let i = 1; i <= 20; i++) {
+        const ingredient = meal[`strIngredient${i}`];
+        if (ingredient) allIngredients.push(ingredient);
+      }
+
+      const missing = allIngredients.filter(
+        (ingredient) => !selectedIngredients.includes(ingredient)
+      );
+      setMissingIngredients(missing);
+    }
+  }, [meal, selectedIngredients]);
+
+  const resetIngredients = () => {
+    setSelectedIngredients([]);
+    localStorage.removeItem(`ingredients-${id}`);
+  };
+
+  // Générer un lien de recherche sur Amazon ou Google Shopping pour chaque ingrédient manquant
+  const generateShoppingLink = (ingredient) => {
+    const query = encodeURIComponent(ingredient);
+    return `https://www.google.com/search?q=${query}+acheter`;  // Ici tu peux personnaliser le site que tu préfères (Amazon, eBay, etc.)
+  };
+
+   // Fonction pour copier la liste des ingrédients manquants
+   const copyShoppingList = () => {
+    const shoppingList = missingIngredients.join(", ");
+    navigator.clipboard.writeText(shoppingList);
+    alert("Liste de courses copiée dans le presse-papiers !");
+  };
 
   const currentUrl = window.location.href;
  
@@ -148,24 +207,84 @@ function RecipeDetail() {
         </div>
       </div>
 
-      <h3 className="my-4" style={{ color: "#2C7865" }}>
-        Ingrédients :
-      </h3>
+      {/* Liste des ingrédients */}
+      <h3 className="my-4" style={{ color: "#2C7865" }}>Ingrédients</h3>
       <ul className="list-group">
-        {Array.from({ length: 20 }, (_, i) => {
+        {[...Array(20)].map((_, i) => {
           const ingredient = meal[`strIngredient${i + 1}`];
           const measure = meal[`strMeasure${i + 1}`];
-          return ingredient ? (
-            <li
-              key={i}
-              className="list-group-item"
-              style={{ color: "#2C7865" }}
-            >
-              {ingredient} - {measure}
-            </li>
-          ) : null;
+          if (ingredient && ingredient.trim()) {
+            const isSelected = selectedIngredients.includes(ingredient);
+
+            return (
+              <li key={i} className="list-group-item">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleIngredient(ingredient)}
+                  className="me-2"
+                />
+                {ingredient} - {measure}
+              </li>
+            );
+          }
+          return null;
         })}
       </ul>
+
+      <div className="container">
+        {/* ... */}
+        <div className="my-4">
+          <button className="btn btn-warning" onClick={resetIngredients}>
+            Réinitialiser les ingrédients sélectionnés
+          </button>
+        </div>
+        {/* ... */}
+      </div>
+
+       {/* Afficher les ingrédients manquants */}
+       <h3 className="my-4" style={{ color: "#2C7865" }}>Ingrédients Manquants</h3>
+          {missingIngredients.length > 0 ? (
+            <div>
+              <ul className="list-group">
+                {missingIngredients.map((ingredient, index) => (
+                  <li key={index} className="list-group-item" style={{ color: "#2C7865" }}>
+                    {ingredient}
+                    <a
+                      href={generateShoppingLink(ingredient)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-sm btn-primary ms-2"
+                    >
+                      Acheter en ligne
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Bouton pour copier la liste de courses */}
+              <button className="btn btn-info mt-3" onClick={copyShoppingList}>
+                Copier la liste de courses
+              </button>
+
+              {/* Option pour afficher la liste de courses en texte */}
+              <button
+                className="btn btn-secondary mt-3 ms-2"
+                onClick={() => setShowShoppingList(!showShoppingList)}
+              >
+                {showShoppingList ? "Masquer la liste" : "Afficher la liste de courses"}
+              </button>
+
+              {showShoppingList && (
+                <div className="mt-3">
+                  <h4>Liste de courses :</h4>
+                  <p>{missingIngredients.join(", ")}</p>
+                </div>
+              )}
+            </div>
+      ) : (
+        <p style={{ color: "#2C7865" }}>Vous avez tous les ingrédients nécessaires !</p>
+      )}
 
       {/* Section pour ajouter aux favoris */}
       <div className="my-4">
@@ -180,7 +299,7 @@ function RecipeDetail() {
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
-            <option value="">Sélectionner une catégorie</option>
+            <option value="" >Sélectionner une catégorie</option>
             {Object.keys(categories).map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
@@ -236,7 +355,11 @@ function RecipeDetail() {
       {/* Formulaire de commentaire */}
       <form onSubmit={handleCommentSubmit}>
         <div className="mb-3">
-          <label htmlFor="comment" className="form-label" style={{ color: "#2C7865" }}>
+          <label
+            htmlFor="comment"
+            className="form-label"
+            style={{ color: "#2C7865" }}
+          >
             Ajouter un commentaire
           </label>
           <textarea
@@ -248,7 +371,9 @@ function RecipeDetail() {
           ></textarea>
         </div>
         <div className="mb-3">
-          <label className="form-label" style={{ color: "#2C7865" }}>Donner une note</label>
+          <label className="form-label" style={{ color: "#2C7865" }}>
+            Donner une note
+          </label>
           <div>
             {[1, 2, 3, 4, 5].map((rate) => (
               <FontAwesomeIcon
@@ -263,7 +388,7 @@ function RecipeDetail() {
             ))}
           </div>
         </div>
-        <button type="submit" className="btn btn-primary" >
+        <button type="submit" className="btn btn-primary">
           Soumettre
         </button>
       </form>
