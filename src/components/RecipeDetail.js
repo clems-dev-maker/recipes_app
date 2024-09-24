@@ -393,7 +393,7 @@ function RecipeDetail() {
         </button>
       </form>
 
-      <Link to="/" className="btn btn-secondary mt-4">
+      <Link to="/" className="btn btn-secondary mt-4" style={{marginBottom: "15px"}}>
         Retour à l'accueil
       </Link>
     </div>
